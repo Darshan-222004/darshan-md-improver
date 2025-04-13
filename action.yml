@@ -10,25 +10,30 @@ inputs:
   purpose:
     description: "Purpose of improvement"
     required: true
+
 runs:
   using: "composite"
   steps:
-    - run: echo "Cloning the repo..."
-      shell: bash
-    - run: git clone ${{ inputs.repo }} repo
-      shell: bash
-
-    - run: echo "Installing OpenAI Python package..."
-      shell: bash
-    - run: pip install openai
+    - name: "Clone Repository"
+      run: |
+        echo "Cloning the repo..."
+        git clone ${{ inputs.repo }} repo
       shell: bash
 
-    - run: echo "Copying Python script to the cloned repo folder..."
-      shell: bash
-    - run: cp ${{ github.action_path }}/md_auto_refine.py repo/
+    - name: "Install OpenAI Python Package"
+      run: |
+        echo "Installing OpenAI Python package..."
+        pip install openai
       shell: bash
 
-    - run: echo "Running the script..."
+    - name: "Copy Python Script"
+      run: |
+        echo "Copying Python script to the cloned repo folder..."
+        cp ${{ github.action_path }}/md_auto_refine.py repo/
       shell: bash
-    - run: python repo/md_auto_refine.py ${{ inputs.mdfile }} ${{ inputs.purpose }}
+
+    - name: "Run Markdown Improvement Script"
+      run: |
+        echo "Running the script..."
+        python repo/md_auto_refine.py ${{ inputs.mdfile }} ${{ inputs.purpose }}
       shell: bash
