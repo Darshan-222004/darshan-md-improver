@@ -3,25 +3,30 @@ description: "A GitHub Action to improve markdown files using OpenAI."
 
 inputs:
   repo:
-    description: 'Repository URL'
+    description: "Repository URL"
     required: true
   mdfile:
-    description: 'Markdown file to improve'
+    description: "Markdown file to improve"
     required: true
   purpose:
-    description: 'Purpose for improving markdown'
+    description: "Purpose for improving markdown"
     required: true
 
 runs:
   using: "composite"
   steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.x"
+
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
         repository: ${{ inputs.repo }}
-        ref: "main"  # or whichever branch you're working on
-    
-    - name: Run markdown improvement
+        ref: "main"
+
+    - name: Run markdown refinement
       run: |
-        python3 improve_md.py --repo ${{ inputs.repo }} --file ${{ inputs.mdfile }} --purpose ${{ inputs.purpose }}
-      shell: bash  # Ensure this property is included
+        python3 md_auto_refine.py "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+      shell: bash
