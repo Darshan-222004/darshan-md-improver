@@ -24,4 +24,4 @@ runs:
     - name: Run markdown improvement
       run: |
         python3 improve_md.py --repo ${{ inputs.repo }} --file ${{ inputs.mdfile }} --purpose ${{ inputs.purpose }}
-      shell: bash  # Specify the shell here (bash is the most common)
+      shell: bash  # Ensure this property is included
