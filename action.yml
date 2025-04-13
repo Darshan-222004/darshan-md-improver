@@ -19,7 +19,7 @@ runs:
     - run: echo "Installing OpenAI Python package..."
     - run: pip install openai
 
-    - run: echo "Copying Python script to cloned repo folder..."
+    - run: echo "Copying Python script to the cloned repo folder..."
     - run: cp ${{ github.action_path }}/md_auto_refine.py repo/
 
     - run: echo "Running the script..."
