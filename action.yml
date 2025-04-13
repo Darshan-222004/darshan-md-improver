@@ -31,6 +31,3 @@ runs:
       shell: bash
 
     - name: Run Python script
-      run: |
-        python repo/md_auto_refine.py ${{ inputs.mdfile }} ${{ inputs.purpose }}
-      shell: bash
