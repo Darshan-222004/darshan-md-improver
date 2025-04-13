@@ -1,31 +1,29 @@
-name: "Darshan Markdown Improver"
-description: "Refines a markdown file in a given repo using OpenAI"
+name: "Markdown Refiner Action"
+description: "Improves markdown files in a given repo using OpenAI"
+author: "Darshan Bharadwaj"
+
 inputs:
   repo:
-    description: "GitHub repo to clone"
+    description: 'The GitHub repository URL'
     required: true
   mdfile:
-    description: "Markdown file to refine"
+    description: 'The markdown file to refine'
     required: true
   purpose:
-    description: "Purpose of refinement"
+    description: 'The purpose of the refinement'
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Checkout the action repo
-      uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
+    - name: Checkout target repo
       run: |
-        pip install openai python-dotenv gitpython
+        git clone ${{ inputs.repo }} repo
+        cd repo
+      shell: bash
 
-    - name: Run refinement
+    - name: Refine markdown
       run: |
-        python md_auto_refine.py "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+        pip install openai
+        python ../md_auto_refine.py "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+      shell: bash
