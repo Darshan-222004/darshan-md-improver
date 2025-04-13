@@ -1,34 +1,26 @@
-name: ' Darshan Markdown Improver'
-description: 'Refines Markdown files using AI.'
+name: "Darshan Markdown Improver"
+description: "Improves a markdown file using OpenAI API"
 inputs:
   repo:
-    description: 'GitHub repository URL'
+    description: "GitHub repository URL"
     required: true
   mdfile:
-    description: 'Markdown file to refine'
+    description: "Markdown file path inside the repo"
     required: true
   purpose:
-    description: 'Purpose of the refinement'
+    description: "Purpose of improvement"
     required: true
-
 runs:
-  using: 'docker'
-  image: 'docker://python:3.8'
+  using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - run: echo "Cloning the repo..."
+    - run: git clone ${{ inputs.repo }} repo
 
-    - name: Clone repository
-      run: |
-        git clone ${{ inputs.repo }} repo
-      shell: bash  # <-- Add shell property here (bash is a common choice)
+    - run: echo "Installing OpenAI Python package..."
+    - run: pip install openai
 
-    - name: Copy Python script
-      run: |
-        cp ${{ github.action_path }}/md_auto_refine.py repo/
-      shell: bash  # <-- Add shell property here
+    - run: echo "Copying Python script to cloned repo folder..."
+    - run: cp ${{ github.action_path }}/md_auto_refine.py repo/
 
-    - name: Run Python script
-      run: |
-        python repo/md_auto_refine.py ${{ inputs.mdfile }} ${{ inputs.purpose }}
-      shell: bash  # <-- Add shell property here
+    - run: echo "Running the script..."
+    - run: python repo/md_auto_refine.py ${{ inputs.mdfile }} ${{ inputs.purpose }}
