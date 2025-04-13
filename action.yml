@@ -1,33 +1,27 @@
-name: 'Markdown Improver'
-description: 'Refines Markdown files using AI.'
+name: "Darshan MD Improver"
+description: "A GitHub Action to improve markdown files using OpenAI."
 
 inputs:
   repo:
-    description: 'GitHub repository URL'
+    description: 'Repository URL'
     required: true
   mdfile:
-    description: 'Markdown file to refine'
+    description: 'Markdown file to improve'
     required: true
   purpose:
-    description: 'Purpose of the refinement'
+    description: 'Purpose for improving markdown'
     required: true
 
 runs:
-  using: 'docker'
-  image: 'docker://python:3.8'
-
+  using: "composite"
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Clone repository
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.repo }}
+        ref: "main"  # or whichever branch you're working on
+    
+    - name: Run markdown improvement
       run: |
-        git clone ${{ inputs.repo }} repo
-      shell: bash
-
-    - name: Copy Python script
-      run: |
-        cp ${{ github.action_path }}/md_auto_refine.py repo/
-      shell: bash
-
-    - name: Run Python script
+        python3 improve_md.py --repo ${{ inputs.repo }} --file ${{ inputs.mdfile }} --purpose ${{ inputs.purpose }}
+      shell: bash  # Specify the shell here (bash is the most common)
