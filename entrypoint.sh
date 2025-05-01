@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 
 REPO_URL=$1
