@@ -1,6 +1,5 @@
 name: "Darshan Markdown Improver"
 description: "Improves a markdown file in any GitHub repo using purpose"
-
 inputs:
   repo:
     description: 'GitHub repo URL to clone'
@@ -15,15 +14,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout test-md-usage repo
-      uses: actions/checkout@v4
-
-    - name: Clone action repo (darshan-md-improver)
+    - name: Clone action repo
       run: |
-        git clone https://github.com/Darshan-222004/darshan-md-improver.git
+        git clone https://github.com/Darshan-222004/darshan-md-improver.git improver
       shell: bash
 
     - name: Run improvement script
       shell: bash
       run: |
-        bash darshan-md-improver/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+        chmod +x improver/entrypoint.sh
+        ./improver/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
