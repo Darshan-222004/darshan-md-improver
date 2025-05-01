@@ -1,0 +1,21 @@
+name: "Darshan Markdown Improver"
+description: "Improves a markdown file in any GitHub repo using purpose"
+inputs:
+  repo:
+    description: 'GitHub repo URL to clone'
+    required: true
+  mdfile:
+    description: 'Markdown file path to improve'
+    required: true
+  purpose:
+    description: 'Purpose of the markdown improvement'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout the action repo
+      uses: actions/checkout@v4
+
+    - name: Run improvement script
+      shell: bash
+      run: ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
