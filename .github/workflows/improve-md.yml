@@ -1,0 +1,23 @@
+name: Improve Markdown File
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  improve-md:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Improve README.md
+        uses: Darshan-222004/darshan-md-improver@v2
+        with:
+          repo: https://github.com/Darshan-222004/darshan-md-improver
+          mdfile: README.md
+          purpose: introduce a programming concept
