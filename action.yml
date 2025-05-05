@@ -17,12 +17,20 @@ runs:
   steps:
     - name: Clone the action repository
       shell: bash
-      run: git clone https://github.com/Darshan-222004/darshan-md-improver.git improver-repo
+      run: |
+        git clone https://github.com/Darshan-222004/darshan-md-improver.git improver-repo
 
     - name: Make entrypoint.sh executable
       shell: bash
-      run: chmod +x ./improver-repo/entrypoint.sh
+      run: |
+        chmod +x ./improver-repo/entrypoint.sh
 
     - name: Run improvement script
       shell: bash
-      run: ./improver-repo/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+      run: |
+        ./improver-repo/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+
+    - name: Clean up
+      shell: bash
+      run: |
+        rm -rf improver-repo
