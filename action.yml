@@ -3,22 +3,23 @@ description: "Improves a markdown file in any GitHub repo using purpose"
 
 inputs:
   repo:
-    description: 'GitHub repo URL to clone'
+    description: "GitHub repo URL to clone"
     required: true
   mdfile:
-    description: 'Markdown file path to improve'
+    description: "Markdown file path to improve"
     required: true
   purpose:
-    description: 'Purpose of the markdown improvement'
+    description: "Purpose of the markdown improvement"
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Clone improver repo
-      run: git clone https://github.com/Darshan-222004/darshan-md-improver.git improver
-      shell: bash
+    - name: Download darshan-md-improver repo
+      run: |
+        git clone https://github.com/Darshan-222004/darshan-md-improver.git improver-repo
+        chmod +x improver-repo/entrypoint.sh
 
-    - name: Run entrypoint script
-      run: bash improver/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+    - name: Run improvement script
       shell: bash
+      run: ./improver-repo/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
