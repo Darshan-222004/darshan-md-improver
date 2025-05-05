@@ -1,23 +1,46 @@
 #!/bin/bash
+
+# Exit the script if any command fails
 set -e
 
-REPO_URL=$1
+# Input parameters
+REPO=$1
 MD_FILE=$2
 PURPOSE=$3
 
-echo "🚀 Cloning repo: $REPO_URL"
-git clone "$REPO_URL" repo-clone
-cd repo-clone
+# Temporary directory to clone the repository
+TEMP_DIR=$(mktemp -d)
 
-echo "📄 Target file: $MD_FILE"
-echo "🎯 Purpose: $PURPOSE"
+echo "Cloning repository: $REPO"
+git clone "$REPO" "$TEMP_DIR"
 
-# Instead of OpenAI, just simulate the improvement
-echo "💡 Improving $MD_FILE for purpose: $PURPOSE"
-echo "✅ (SIMULATED) Improved content below:"
-echo "-------------------------------------"
-cat "$MD_FILE"
-echo "-------------------------------------"
+# Change to the cloned repository's directory
+cd "$TEMP_DIR"
 
-echo "✅ Action completed!"
+# Check if the markdown file exists
+if [[ ! -f "$MD_FILE" ]]; then
+  echo "Error: Markdown file $MD_FILE not found in the repository."
+  exit 1
+fi
 
+echo "Improving markdown file: $MD_FILE"
+
+# Implement your logic here to improve the markdown file based on the 'PURPOSE'
+# For example, adding a header or modifying content:
+
+echo "Purpose: $PURPOSE"
+echo -e "\n### Improved by Markdown Improver\n" >> "$MD_FILE"
+
+# Add a simple improvement, like appending a footer
+echo -e "\n<!-- Improved for purpose: $PURPOSE -->" >> "$MD_FILE"
+
+# Optional: You can modify the markdown file using any tool or script based on the 'PURPOSE'
+
+# After modification, let's commit the changes (optional step)
+git config user.name "github-actions"
+git config user.email "github-actions@github.com"
+git add "$MD_FILE"
+git commit -m "Improved markdown file: $MD_FILE for purpose: $PURPOSE"
+git push origin main
+
+echo "Markdown file improved and changes pushed to the repository."
