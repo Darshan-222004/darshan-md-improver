@@ -15,7 +15,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Download darshan-md-improver repo
+    - name: Clone darshan-md-improver repo
+      shell: bash
       run: |
         git clone https://github.com/Darshan-222004/darshan-md-improver.git improver-repo
         chmod +x improver-repo/entrypoint.sh
