@@ -15,12 +15,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Clone darshan-md-improver repo
+    - name: Make entrypoint.sh executable
       shell: bash
-      run: |
-        git clone https://github.com/Darshan-222004/darshan-md-improver.git improver-repo
-        chmod +x improver-repo/entrypoint.sh
+      run: chmod +x ./entrypoint.sh
 
     - name: Run improvement script
       shell: bash
-      run: ./improver-repo/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+      run: ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
