@@ -1,4 +1,5 @@
 name: Improve Markdown File
+
 on:
   push:
     branches:
@@ -21,3 +22,6 @@ jobs:
           repo: https://github.com/Darshan-222004/darshan-md-improver
           mdfile: README.md
           purpose: introduce a programming concept
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
