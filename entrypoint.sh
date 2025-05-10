@@ -43,4 +43,3 @@ with open("$MDFILE", "w") as f:
 
 print("✅ Markdown improvement done.")
 EOF
-
