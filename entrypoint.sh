@@ -1,46 +1,46 @@
 #!/bin/bash
 
-# Exit the script if any command fails
-set -e
+REPO="$1"
+MDFILE="$2"
+PURPOSE="$3"
 
-# Input parameters
-REPO=$1
-MD_FILE=$2
-PURPOSE=$3
+echo "Improving $MDFILE from $REPO for purpose: $PURPOSE"
 
-# Temporary directory to clone the repository
-TEMP_DIR=$(mktemp -d)
+# Clone the repo
+git clone "$REPO" repo-clone
+cd repo-clone || exit 1
 
-echo "Cloning repository: $REPO"
-git clone "$REPO" "$TEMP_DIR"
+# Install OpenAI SDK (requires 'requests' also)
+pip install openai --quiet
 
-# Change to the cloned repository's directory
-cd "$TEMP_DIR"
-
-# Check if the markdown file exists
-if [[ ! -f "$MD_FILE" ]]; then
-  echo "Error: Markdown file $MD_FILE not found in the repository."
+# Check for API key
+if [ -z "$OPENAI_API_KEY" ]; then
+  echo "❌ OPENAI_API_KEY not set"
   exit 1
 fi
 
-echo "Improving markdown file: $MD_FILE"
+# Read original markdown
+CONTENT=$(<"$MDFILE")
 
-# Implement your logic here to improve the markdown file based on the 'PURPOSE'
-# For example, adding a header or modifying content:
+# Create a temporary Python script to improve markdown
+python3 <<EOF
+import openai
+import os
 
-echo "Purpose: $PURPOSE"
-echo -e "\n### Improved by Markdown Improver\n" >> "$MD_FILE"
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Add a simple improvement, like appending a footer
-echo -e "\n<!-- Improved for purpose: $PURPOSE -->" >> "$MD_FILE"
+response = openai.ChatCompletion.create(
+    model="gpt-4-turbo",
+    messages=[{
+        "role": "user",
+        "content": f"Improve the following markdown to better $PURPOSE:\n\n'''{CONTENT}'''"
+    }],
+    temperature=0.7
+)
 
-# Optional: You can modify the markdown file using any tool or script based on the 'PURPOSE'
+with open("$MDFILE", "w") as f:
+    f.write(response['choices'][0]['message']['content'])
 
-# After modification, let's commit the changes (optional step)
-git config user.name "github-actions"
-git config user.email "github-actions@github.com"
-git add "$MD_FILE"
-git commit -m "Improved markdown file: $MD_FILE for purpose: $PURPOSE"
-git push origin main
+print("✅ Markdown improvement done.")
+EOF
 
-echo "Markdown file improved and changes pushed to the repository."
