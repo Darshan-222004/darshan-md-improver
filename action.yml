@@ -11,6 +11,9 @@ inputs:
   purpose:
     description: "Purpose of the markdown improvement"
     required: true
+  token:
+    description: "GitHub token for authentication"
+    required: true
 
 runs:
   using: "composite"
@@ -28,7 +31,7 @@ runs:
     - name: Run improvement script
       shell: bash
       run: |
-        ./improver-repo/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}"
+        ./improver-repo/entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ inputs.token }}"
 
     - name: Clean up
       shell: bash
