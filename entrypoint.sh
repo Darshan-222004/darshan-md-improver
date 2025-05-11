@@ -4,42 +4,46 @@ REPO="$1"
 MDFILE="$2"
 PURPOSE="$3"
 
-echo "Improving $MDFILE from $REPO for purpose: $PURPOSE"
+echo "📘 Improving $MDFILE from $REPO for purpose: $PURPOSE"
 
 # Clone the repo
 git clone "$REPO" repo-clone
 cd repo-clone || exit 1
 
-# Install OpenAI SDK (requires 'requests' also)
-pip install openai --quiet
-
-# Check for API key
+# ✅ Check for API key
 if [ -z "$OPENAI_API_KEY" ]; then
   echo "❌ OPENAI_API_KEY not set"
   exit 1
 fi
 
-# Read original markdown
-CONTENT=$(<"$MDFILE")
+# ✅ Install OpenAI SDK safely
+python3 -m pip install --quiet openai
 
-# Create a temporary Python script to improve markdown
+# ✅ Run Python to read + improve markdown (pass shell vars safely)
 python3 <<EOF
 import openai
 import os
 
+# Set API key from env
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Read markdown content
+with open("$MDFILE", "r", encoding="utf-8") as f:
+    content = f.read()
+
+# Get purpose from shell argument
+purpose = "$PURPOSE"
+
+# OpenAI request
 response = openai.ChatCompletion.create(
     model="gpt-4-turbo",
     messages=[{
         "role": "user",
-        "content": f"Improve the following markdown to better $PURPOSE:\n\n'''{CONTENT}'''"
+        "content": f"Improve the following markdown to better {purpose}:\n\n'''{content}'''"
     }],
     temperature=0.7
 )
 
-with open("$MDFILE", "w") as f:
-    f.write(response['choices'][0]['message']['content'])
-
-print("✅ Markdown improvement done.")
-EOF
+# Write improved content back
+with open("$MDFILE", "w", encoding="utf-8") as f:
+    f.write(response['choices']
