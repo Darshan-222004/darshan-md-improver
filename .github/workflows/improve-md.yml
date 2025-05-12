@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Allows push access
+  contents: write
 
 jobs:
   improve-md:
@@ -23,7 +23,7 @@ jobs:
       - name: Use Markdown Improver
         uses: Darshan-222004/darshan-md-improver@v2
         with:
-          repo: https://github.com/Darshan-222004/your-target-repo
+          repo: https://github.com/Darshan-222004/darshan-md-improver
           mdfile: README.md
           purpose: "introduce a programming concept"
         env:
