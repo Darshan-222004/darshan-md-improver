@@ -9,16 +9,16 @@ permissions:
 jobs:
   improve-md:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}  # Only needed for forks
 
-      - name: Setup Git
+      - name: Setup Python and OpenAI
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python -m pip install --upgrade pip
+          pip install openai==0.28
 
       - name: Use Markdown Improver
         uses: Darshan-222004/darshan-md-improver@v2
@@ -31,6 +31,8 @@ jobs:
 
       - name: Commit and Push
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md
           git commit -m "Automated Markdown improvement"
           git push
