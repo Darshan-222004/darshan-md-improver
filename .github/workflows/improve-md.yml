@@ -3,6 +3,9 @@ name: Improve Markdown File
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write  # Explicitly grant push access for committing changes
+
 jobs:
   improve-md:
     runs-on: ubuntu-latest
