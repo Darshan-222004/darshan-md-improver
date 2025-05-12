@@ -14,17 +14,24 @@ inputs:
   token:
     required: true
     description: 'GitHub Token for making PRs'
+  openai_key:
+    required: true
+    description: 'OpenAI API Key'
 
 runs:
   using: "composite"
   steps:
-    - name: Checkout target repo
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ inputs.repo }}
+    - name: Clone target repository
+      shell: bash
+      run: |
+        git clone https://x-access-token:${{ inputs.token }}@github.com/${{ inputs.repo }} repo-clone
+        cd repo-clone
 
     - name: Run improvement script
       shell: bash
-      run: chmod +x ./entrypoint.sh && ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ inputs.token }}"
+      run: |
+        chmod +x ./entrypoint.sh
+        ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ inputs.token }}"
       env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Now properly passed
+        OPENAI_API_KEY: ${{ inputs.openai_key }}
+
