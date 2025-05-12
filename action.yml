@@ -18,8 +18,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Run script
+    - name: Checkout target repo
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.repo }}
+
+    - name: Run improvement script
       shell: bash
-      run: ./entrypoint.sh
+      run: chmod +x ./entrypoint.sh && ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ inputs.token }}"
       env:
-        OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Now properly passed
