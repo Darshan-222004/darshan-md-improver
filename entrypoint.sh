@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail  # Enable strict mode
+set -euo pipefail
 
 REPO="$1"
 MDFILE="$2"
@@ -8,85 +8,64 @@ GITHUB_TOKEN="${4:-}"
 
 echo "📘 Improving $MDFILE from $REPO for purpose: $PURPOSE"
 
-# ✅ Verify API Key
-if [ -z "$OPENAI_API_KEY" ]; then
-  echo "❌ Error: OPENAI_API_KEY not set in environment variables!"
-  exit 1
+# Check for valid API key pattern
+if [[ -z "$OPENAI_API_KEY" || "$OPENAI_API_KEY" == "sk-..."* ]]; then
+    echo "⚠️ Warning: Invalid or placeholder OpenAI API key - skipping improvement"
+    exit 0
 fi
 
 # Verify markdown file exists
-if [ ! -f "$MDFILE" ]; then
-  echo "❌ Error: File $MDFILE not found!"
-  exit 1
-fi
+[ -f "$MDFILE" ] || { echo "❌ Error: File $MDFILE not found!"; exit 1; }
 
-# Clone the target repo (already handled by composite action)
 cd "$GITHUB_WORKSPACE" || exit 1
 
-# Install dependencies
 echo "🔧 Installing dependencies..."
-python3 -m pip install --quiet openai
+python3 -m pip install --quiet openai tenacity
 
-# Run Python script to improve markdown
 echo "🛠 Processing markdown file..."
 python3 <<EOF
 import os
 from openai import OpenAI
-from openai import APIConnectionError, APIError, RateLimitError
+from tenacity import retry, stop_after_attempt, wait_exponential
 
-try:
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    with open("$MDFILE", "r", encoding="utf-8") as f:
-        content = f.read()
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def improve_content(content, purpose):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  # Fallback to cheaper model
+            messages=[{
+                "role": "user",
+                "content": f"Improve this markdown to better {purpose}:\n\n'''{content}'''"
+            }],
+            temperature=0.7,
+            max_tokens=2000
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"⚠️ Warning: {str(e)}")
+        return content  # Return original if error occurs
 
-    if not content.strip():
-        raise ValueError("File is empty")
+with open("$MDFILE", "r", encoding="utf-8") as f:
+    content = f.read()
 
-    response = client.chat.completions.create(
-        model="gpt-4-turbo",
-        messages=[{
-            "role": "user", 
-            "content": f"Improve this markdown to better {os.getenv('PURPOSE', '$PURPOSE')}. Maintain all technical accuracy while improving clarity, structure, and readability:\\n\\n'''{content}'''"
-        }],
-        temperature=0.7
-    )
+improved = improve_content(content, "$PURPOSE")
 
-    improved_content = response.choices[0].message.content
-    if not improved_content.strip():
-        raise ValueError("Received empty response from API")
-
-    with open("$MDFILE", "w", encoding="utf-8") as f:
-        f.write(improved_content)
-
-except (APIConnectionError, APIError, RateLimitError) as e:
-    print(f"❌ OpenAI API error: {e}")
-    exit(1)
-except Exception as e:
-    print(f"❌ Unexpected error: {e}")
-    exit(1)
+with open("$MDFILE", "w", encoding="utf-8") as f:
+    f.write(improved)
 EOF
 
-# Configure Git
-echo "🔧 Configuring Git..."
-git config --global user.name "github-actions[bot]"
-git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-# Check if there are changes to commit
+# Only commit if there are changes
 if git diff --quiet -- "$MDFILE"; then
-    echo "🔄 No changes detected in $MDFILE"
+    echo "🔄 No changes made to $MDFILE"
     exit 0
 fi
 
-# Commit and push changes
-echo "💾 Committing and pushing changes..."
+git config --global user.name "github-actions[bot]"
+git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 git add "$MDFILE"
-git commit -m "Improved $MDFILE for better $PURPOSE [skip ci]"
+git commit -m "Docs: Improved $MDFILE for $PURPOSE [skip ci]"
 
-if [ -n "$GITHUB_TOKEN" ]; then
-    echo "🔑 Authenticating with GitHub token"
-    git remote set-url origin "https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git"
-fi
-
-git push origin HEAD
-echo "✅ Successfully updated $MDFILE"
+[ -n "$GITHUB_TOKEN" ] && git push origin HEAD
+echo "✅ Markdown update completed"
