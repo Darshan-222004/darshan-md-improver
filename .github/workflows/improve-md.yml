@@ -4,18 +4,33 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Explicitly grant push access for committing changes
+  contents: write  # Allows push access
 
 jobs:
   improve-md:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Use Markdown Improver
         uses: Darshan-222004/darshan-md-improver@v2
         with:
           repo: https://github.com/Darshan-222004/your-target-repo
           mdfile: README.md
-          purpose: introduce a programming concept
+          purpose: "introduce a programming concept"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Commit and Push
+        run: |
+          git add README.md
+          git commit -m "Automated Markdown improvement"
+          git push
