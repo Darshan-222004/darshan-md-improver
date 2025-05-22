@@ -6,24 +6,56 @@ MDFILE="$2"
 PURPOSE="$3"
 GITHUB_TOKEN="${4:-}"
 
-echo "=== Debug Information ==="
-echo "📘 Repository: $REPO"
-echo "📄 Target file: $MDFILE"
-echo "🎯 Purpose: $PURPOSE"
-echo "📁 Workspace: $GITHUB_WORKSPACE"
-echo "Current directory: $(pwd)"
-echo "Files in workspace:"
-ls -la "$GITHUB_WORKSPACE"
+echo "=== STARTING PROCESS ==="
+echo "Repository: $REPO"
+echo "Target file: $MDFILE"
+echo "Improvement goal: $PURPOSE"
 
 # Verify file exists
 MD_PATH="$GITHUB_WORKSPACE/$MDFILE"
-[ -f "$MD_PATH" ] || { 
-  echo "❌ Error: File $MD_PATH not found! Available files:";
-  ls -la "$GITHUB_WORKSPACE";
-  exit 1;
-}
+echo "Checking for file at: $MD_PATH"
 
-echo "✅ Found file at: $MD_PATH"
+if [ ! -f "$MD_PATH" ]; then
+  echo "❌ Error: File $MDFILE not found in repository!"
+  echo "Available files:"
+  ls -la "$GITHUB_WORKSPACE"
+  exit 1
+fi
 
-# Rest of your original script (Python processing, git commands etc.)
-# ... [keep your existing implementation here] ...
+echo "✅ Found file. Current content:"
+cat "$MD_PATH"
+
+# Process the file (your existing Python script)
+echo "🔄 Improving markdown..."
+python3 <<EOF
+import os
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+with open("$MD_PATH", "r") as f:
+    content = f.read()
+
+response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[{
+        "role": "user",
+        "content": f"Improve this markdown for better $PURPOSE:\n\n'''{content}'''"
+    }]
+)
+
+improved = response.choices[0].message.content
+
+with open("$MD_PATH", "w") as f:
+    f.write(improved)
+EOF
+
+# Commit changes
+echo "💾 Saving improvements..."
+git config --global user.name "GitHub Action"
+git config --global user.email "action@github.com"
+git add "$MD_PATH"
+git commit -m "Improved $MDFILE for $PURPOSE [bot]"
+git push origin HEAD
+
+echo "✅ Successfully improved $MDFILE"
