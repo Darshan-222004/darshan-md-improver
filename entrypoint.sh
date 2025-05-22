@@ -13,38 +13,41 @@ echo "Improvement goal: $PURPOSE"
 
 # Verify file exists
 MD_PATH="$GITHUB_WORKSPACE/$MDFILE"
-echo "Checking for file at: $MD_PATH"
-
-if [ ! -f "$MD_PATH" ]; then
-  echo "❌ Error: File $MDFILE not found in repository!"
-  echo "Available files:"
-  ls -la "$GITHUB_WORKSPACE"
-  exit 1
-fi
+[ -f "$MD_PATH" ] || { echo "❌ Error: File $MDFILE not found!"; exit 1; }
 
 echo "✅ Found file. Current content:"
 cat "$MD_PATH"
 
-# Process the file (your existing Python script)
+# Install Python dependencies
+echo "🔧 Installing dependencies..."
+python3 -m pip install --upgrade pip
+python3 -m pip install openai tenacity
+
+# Process the file
 echo "🔄 Improving markdown..."
 python3 <<EOF
 import os
 from openai import OpenAI
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def improve_content(content, purpose):
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{
+            "role": "user",
+            "content": f"Improve this markdown for {purpose}:\n\n'''{content}'''"
+        }],
+        temperature=0.7
+    )
+    return response.choices[0].message.content
 
 with open("$MD_PATH", "r") as f:
     content = f.read()
 
-response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[{
-        "role": "user",
-        "content": f"Improve this markdown for better $PURPOSE:\n\n'''{content}'''"
-    }]
-)
-
-improved = response.choices[0].message.content
+improved = improve_content(content, "$PURPOSE")
 
 with open("$MD_PATH", "w") as f:
     f.write(improved)
@@ -55,7 +58,7 @@ echo "💾 Saving improvements..."
 git config --global user.name "GitHub Action"
 git config --global user.email "action@github.com"
 git add "$MD_PATH"
-git commit -m "Improved $MDFILE for $PURPOSE [bot]"
-git push origin HEAD
+git diff --cached --quiet || git commit -m "Improved $MDFILE for $PURPOSE [bot]"
+[ -n "$GITHUB_TOKEN" ] && git push
 
 echo "✅ Successfully improved $MDFILE"
