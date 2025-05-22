@@ -11,6 +11,6 @@ runs:
   using: "composite"
   steps:
     - run: |
-        chmod +x ./entrypoint.sh
-        ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ env.GITHUB_TOKEN }}"
+        chmod +x "$GITHUB_ACTION_PATH/entrypoint.sh"
+        "$GITHUB_ACTION_PATH/entrypoint.sh" "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ env.GITHUB_TOKEN }}"
       shell: bash
