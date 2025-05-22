@@ -1,6 +1,5 @@
 name: 'Markdown Improver'
-description: 'Uses OpenAI to improve a Markdown file'
-
+description: 'Improves markdown files using OpenAI API'
 inputs:
   repo:
     required: true
@@ -8,14 +7,10 @@ inputs:
     required: true
   purpose:
     required: true
-  token:
-    required: true
-
 runs:
   using: "composite"
   steps:
-    - name: Run Markdown Improver script
+    - run: |
+        chmod +x ./entrypoint.sh
+        ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ env.GITHUB_TOKEN }}"
       shell: bash
-      run: |
-        chmod +x "${{ github.action_path }}/entrypoint.sh"
-        "${{ github.action_path }}/entrypoint.sh" "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ inputs.token }}"
