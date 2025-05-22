@@ -2,15 +2,20 @@ name: 'Markdown Improver'
 description: 'Improves markdown files using OpenAI API'
 inputs:
   repo:
+    description: 'Repository name'
     required: true
   mdfile:
+    description: 'Markdown filename (just name, no path)'
     required: true
   purpose:
+    description: 'Improvement goal'
     required: true
 runs:
   using: "composite"
   steps:
     - run: |
+        echo "Action path: $GITHUB_ACTION_PATH"
+        ls -la "$GITHUB_ACTION_PATH"
         chmod +x "$GITHUB_ACTION_PATH/entrypoint.sh"
-        "$GITHUB_ACTION_PATH/entrypoint.sh" "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ env.GITHUB_TOKEN }}"
+        "$GITHUB_ACTION_PATH/entrypoint.sh" "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ github.token }}"
       shell: bash
