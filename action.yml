@@ -5,16 +5,18 @@ inputs:
     description: 'Repository name'
     required: true
   mdfile:
-    description: 'Markdown filename (just name, no path)'
+    description: 'Markdown filename'
     required: true
+    default: 'sample.md'
   purpose:
     description: 'Improvement goal'
     required: true
+    default: 'enhance documentation'
 runs:
   using: "composite"
   steps:
     - run: |
-        echo "Action path: $GITHUB_ACTION_PATH"
+        echo "Checking files in action directory:"
         ls -la "$GITHUB_ACTION_PATH"
         chmod +x "$GITHUB_ACTION_PATH/entrypoint.sh"
         "$GITHUB_ACTION_PATH/entrypoint.sh" "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ github.token }}"
