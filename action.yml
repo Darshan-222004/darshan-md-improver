@@ -1,37 +1,21 @@
-name: 'Darshan Markdown Improver'
-description: 'Improves markdown files using OpenAI'
+name: 'Markdown Improver'
+description: 'Uses OpenAI to improve a Markdown file'
 
 inputs:
   repo:
     required: true
-    description: 'GitHub repo URL'
   mdfile:
     required: true
-    description: 'Markdown file path'
   purpose:
     required: true
-    description: 'Purpose of the improvement'
   token:
     required: true
-    description: 'GitHub Token for making PRs'
-  openai_key:
-    required: true
-    description: 'OpenAI API Key'
 
 runs:
   using: "composite"
   steps:
-    - name: Clone target repository
+    - name: Run Markdown Improver script
       shell: bash
       run: |
-        git clone https://x-access-token:${{ inputs.token }}@github.com/${{ inputs.repo }} repo-clone
-        cd repo-clone
-
-    - name: Run improvement script
-      shell: bash
-      run: |
-        chmod +x ./entrypoint.sh
-        ./entrypoint.sh "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ inputs.token }}"
-      env:
-        OPENAI_API_KEY: ${{ inputs.openai_key }}
-
+        chmod +x "${{ github.action_path }}/entrypoint.sh"
+        "${{ github.action_path }}/entrypoint.sh" "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ inputs.token }}"
