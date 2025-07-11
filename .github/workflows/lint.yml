@@ -9,14 +9,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # ✅ FIXED: ShellCheck for entrypoint.sh
+      # ✅ ShellCheck for entrypoint.sh (no warnings)
       - name: Lint shell script
         uses: ludeeus/action-shellcheck@master
         with:
-          args: ./entrypoint.sh
+          additional_files: ./entrypoint.sh
 
-      # ✅ Yamllint for action.yml
+      # ✅ Yamllint for action.yml (no warnings)
       - name: Lint action.yml
         uses: ibiqlik/action-yamllint@v3
         with:
-          file_or_dir: "action.yml"
+          file_or_dir: action.yml
+
