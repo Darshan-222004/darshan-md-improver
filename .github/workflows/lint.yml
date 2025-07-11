@@ -1,0 +1,22 @@
+name: Lint Shell and YAML
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # ✅ ShellCheck for entrypoint.sh
+      - name: Lint shell script
+        uses: ludeeus/action-shellcheck@v2
+        with:
+          args: ./entrypoint.sh
+
+      # ✅ Yamllint for action.yml
+      - name: Lint action.yml
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: "action.yml"
