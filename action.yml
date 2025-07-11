@@ -1,3 +1,4 @@
+---
 name: 'Markdown Improver'
 description: 'Improves markdown files using OpenAI API'
 inputs:
@@ -19,5 +20,10 @@ runs:
         echo "Checking files in action directory:"
         ls -la "$GITHUB_ACTION_PATH"
         chmod +x "$GITHUB_ACTION_PATH/entrypoint.sh"
-        "$GITHUB_ACTION_PATH/entrypoint.sh" "${{ inputs.repo }}" "${{ inputs.mdfile }}" "${{ inputs.purpose }}" "${{ github.token }}"
+        "$GITHUB_ACTION_PATH/entrypoint.sh" \
+          "${{ inputs.repo }}" \
+          "${{ inputs.mdfile }}" \
+          "${{ inputs.purpose }}" \
+          "${{ github.token }}"
       shell: bash
+
