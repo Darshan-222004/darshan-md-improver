@@ -26,4 +26,3 @@ runs:
           "${{ inputs.purpose }}" \
           "${{ github.token }}"
       shell: bash
-
