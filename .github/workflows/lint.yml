@@ -28,4 +28,4 @@ jobs:
       - name: Lint Python file
         uses: chartboost/ruff-action@v1
         with:
-          args: improver.py
+          args: check improver.py
