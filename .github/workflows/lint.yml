@@ -1,4 +1,4 @@
-name: Lint Shell and YAML
+name: Lint Shell, YAML, Python, Markdown
 
 on: [push, pull_request]
 
@@ -9,15 +9,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # ✅ ShellCheck for entrypoint.sh (no warnings)
       - name: Lint shell script
         uses: ludeeus/action-shellcheck@master
         with:
           additional_files: ./entrypoint.sh
 
-      # ✅ Yamllint for action.yml (no warnings)
-      - name: Lint action.yml
+      - name: Lint action.yml (optional)
+        if: ${{ hashFiles('action.yml') != '' }}
         uses: ibiqlik/action-yamllint@v3
         with:
           file_or_dir: action.yml
 
+      - name: Lint markdown files
+        uses: actionshub/markdownlint@main
+        with:
+          filesToIgnoreRegex: "sample\\.md"
+
+      - name: Lint Python file
+        uses: chartboost/ruff-action@v1
+        with:
+          args: improver.py
